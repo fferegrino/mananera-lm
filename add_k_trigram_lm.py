@@ -34,22 +34,19 @@ class AddKTrigramLM:
                 w_2 = w_1
                 w_1 = token
 
-        # En `_context_totals` almacenamos las ocurrencias de los bigramas `w_2,w_1`
-        self._context_totals = dict()
-        for context, ctr in counts.items():
-            self._context_totals[context] = sum(ctr.values())
-
         # Convertir los defaultdicts en diccionarios normales
         # esto es solo por fines de presentación
-        self.totals_ = dict()
+        self.token_totals = dict()
         for context, ctr in counts.items():
-            self.totals_[context] = dict(ctr)
+            self.token_totals[context] = dict(ctr)
 
-        self.tokens_ = list(all_tokens)
-        self.V_ = len(self.tokens_)
+        # En `context_totals` almacenamos las ocurrencias de los bigramas `w_2,w_1`
+        self.context_totals = dict()
+        for context, ctr in counts.items():
+            self.context_totals[context] = sum(ctr.values())
 
-
-
+        self.tokens = list(all_tokens)
+        self.V = len(self.tokens)
 
     def set_k(self, k=0.0):
         self.k = k
@@ -61,10 +58,10 @@ class AddKTrigramLM:
         context = tuple(current_sequence[-2:])
 
         # Count word es la cuenta de las veces que ocurren los tokens `w_1`, `w_2` y `token` en el corpus
-        count_word = self.totals_.get(context, {}).get(token, 0)
+        count_word = self.token_totals.get(context, {}).get(token, 0)
 
         # Context count es la cuenta de las veces que ocurren los tokens `w_1` y `w_2` en el corpus
-        context_count = self._context_totals.get(context, 0)
+        context_count = self.context_totals.get(context, 0)
 
 
         if self.k == 0:
@@ -74,4 +71,4 @@ class AddKTrigramLM:
         else:
             # El cáculo de la probabilidad es la división de la cuenta de los tokens `w_1`, `w_2` y `token` entre la
             # cuenta de los tokens `w_1` y `w_2`
-            return (count_word+self.k) / (context_count + self.k * self.V_)
+            return (count_word+self.k) / (context_count + self.k * self.V)

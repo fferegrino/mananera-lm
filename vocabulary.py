@@ -15,12 +15,12 @@ class Vocabulary:
         tokens = chain.from_iterable(tokenized_texts)
 
         # Contamos las ocurrencias de cada token
-        self.single_token_counts_ = Counter(tokens)
-        self.numero_tokens_ = sum(self.single_token_counts_.values())
+        self.single_token_counts = Counter(tokens)
+        self.total_number_of_tokens = sum(self.single_token_counts.values())
 
         # Obtenemos los tokens más comunes con `most_common`, si `size` es `None` entonces se obtienen todos los tokens
         # Si `size` no es `None` entonces se obtienen los `size` tokens más comunes menos 3 (por los tokens especiales)
-        top_counts = self.single_token_counts_.most_common(
+        top_counts = self.single_token_counts.most_common(
             None if self.size is None else (self.size - 3)
         )
 
@@ -30,40 +30,31 @@ class Vocabulary:
         ]
 
         # Creamos los diccionarios para convertir de id a palabra y viceversa
-        self.id_to_word_ = dict(enumerate(vocab))
-        self.word_to_id_ = {v: k for k, v in iter(self.id_to_word_.items())}
+        self.id_to_word = dict(enumerate(vocab))
+        self.word_to_id = {v: k for k, v in iter(self.id_to_word.items())}
 
         # Establecemos estas variables para acceder más fácilmente a la cantidad de tokens y al tamaño del vocabulario
-        self.size_ = len(self.id_to_word_)
-        self.tokenset_ = set(self.word_to_id_.keys())
+        self.size = len(self.id_to_word)
+        self.tokenset = set(self.word_to_id.keys())
 
         # Almacenamos los ids de los tokens especiales
-        self.start_id_ = self.word_to_id_[self.START_TOKEN]
-        self.end_id_ = self.word_to_id_[self.END_TOKEN]
-        self.unk_id_ = self.word_to_id_[self.UNK_TOKEN]
+        self.start_id = self.word_to_id[self.START_TOKEN]
+        self.end_id = self.word_to_id[self.END_TOKEN]
+        self.unk_id = self.word_to_id[self.UNK_TOKEN]
 
     def transform(self, tokenized_texts):
         padded_posts = (
             [self.START_TOKEN, self.START_TOKEN] + p + [self.END_TOKEN]
             for p in tokenized_texts
         )
-        cannonical_posts = [[self._replace_unk(w) for w in p] for p in padded_posts]
+        cannonical_posts = [[self.word_to_id.get(w, self.unk_id) for w in p] for p in padded_posts]
         return cannonical_posts
 
-    def _replace_unk(self, token):
-        if token in self.tokenset_:
-            return token
-        else:
-            return self.UNK_TOKEN
-
     def words_to_ids(self, words):
-        return [self.word_to_id_.get(w, self.unk_id_) for w in words]
+        return [self.word_to_id.get(w, self.unk_id) for w in words]
 
     def ids_to_words(self, ids):
-        return [self.id_to_word_[i] for i in ids]
-
-    def sentence_to_ids(self, words):
-        return [self.start_id_] + self.words_to_ids(words) + [self.end_id_]
+        return [self.id_to_word[i] for i in ids]
 
     def ordered_words(self):
         """Return a list of words, ordered by id."""
