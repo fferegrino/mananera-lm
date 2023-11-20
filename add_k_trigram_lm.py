@@ -4,8 +4,6 @@ from collections import defaultdict
 class AddKTrigramLM:
     """Trigram LM with add-k smoothing."""
 
-    order_n = 3
-
     def __init__(self, k=0.0):
         self.k = k
 
