@@ -1,13 +1,15 @@
 from collections import defaultdict
+from typing import List
 
 
 class AddKTrigramLM:
-    """Trigram LM with add-k smoothing."""
+    """Modelo de lenguaje de trigramas con suavizado Add-k."""
 
-    def __init__(self, k=0.0):
+    def __init__(self, k: float = 0.0):
+        """Inicializa el modelo de lenguaje con el valor de k."""
         self.k = k
 
-    def fit(self, corpus):
+    def fit(self, corpus: List[List[str]]) -> "AddKTrigramLM":
         """Entrena el modelo de lenguaje a partir de un corpus."""
 
         # Creamos un diccionario de diccionarios para guardar las cuentas de los trigramas
@@ -46,10 +48,12 @@ class AddKTrigramLM:
         self.tokens = list(all_tokens)
         self.V = len(self.tokens)
 
-    def set_k(self, k=0.0):
+        return self
+
+    def set_k(self, k: float = 0.0) -> None:
         self.k = k
 
-    def next_token_proba(self, token, current_sequence):
+    def next_token_proba(self, token: str, current_sequence: List[str]) -> float:
         """Calcula la probabilidad de un token dada una secuencia de tokens."""
 
         # Obtenemos los 2 últimos tokens de la secuencia: `w_1` y `w_2`
@@ -61,7 +65,6 @@ class AddKTrigramLM:
         # Context count es la cuenta de las veces que ocurren los tokens `w_1` y `w_2` en el corpus
         context_count = self.context_totals.get(context, 0)
 
-
         if self.k == 0:
             # Si k = 0, entonces no se aplica suavizado y la probabilidad es la división de la cuenta de los
             # tokens `w_1`, `w_2` y `token` entre la cuenta de los tokens `w_1` y `w_2`
@@ -69,4 +72,4 @@ class AddKTrigramLM:
         else:
             # El cáculo de la probabilidad es la división de la cuenta de los tokens `w_1`, `w_2` y `token` entre la
             # cuenta de los tokens `w_1` y `w_2`
-            return (count_word+self.k) / (context_count + self.k * self.V)
+            return (count_word + self.k) / (context_count + self.k * self.V)
